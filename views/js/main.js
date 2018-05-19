@@ -445,11 +445,22 @@ var resizePizzas = function(size) {
   }
 
   // 遍历披萨的元素并改变它们的宽度
+  // 优化前：
+  // function changePizzaSizes(size) {
+  //   for (var i = 0; i < document.querySelectorAll(".randomPizzaContainer").length; i++) {
+  //     var dx = determineDx(document.querySelectorAll(".randomPizzaContainer")[i], size);
+  //     var newwidth = (document.querySelectorAll(".randomPizzaContainer")[i].offsetWidth + dx) + 'px';
+  //     document.querySelectorAll(".randomPizzaContainer")[i].style.width = newwidth;
+  //   }
+  // }
+
+  // 优化后：将对所有pizza对象的选取提到for循环以外，无需重复执行，一次就好;由于pizza对象具备同质性，因此对dx和newwidth的赋值也是一次就好
   function changePizzaSizes(size) {
-    for (var i = 0; i < document.querySelectorAll(".randomPizzaContainer").length; i++) {
-      var dx = determineDx(document.querySelectorAll(".randomPizzaContainer")[i], size);
-      var newwidth = (document.querySelectorAll(".randomPizzaContainer")[i].offsetWidth + dx) + 'px';
-      document.querySelectorAll(".randomPizzaContainer")[i].style.width = newwidth;
+    var randomPizzaContainer = document.querySelectorAll(".randomPizzaContainer");
+    var dx = determineDx(randomPizzaContainer[0], size);
+    var newwidth = (randomPizzaContainer[0].offsetWidth + dx) + 'px';
+    for (var i = 0; i < randomPizzaContainer.length; i++) {
+      randomPizzaContainer[i].style.width = newwidth;
     }
   }
 
@@ -494,26 +505,49 @@ function logAverageFrame(times) {   // times参数是updatePositions()由User Ti
 // https://www.igvita.com/slides/2012/devtools-tips-and-tricks/jank-demo.html
 
 // 基于滚动条位置移动背景中的披萨滑窗
-function updatePositions() {
-  frame++;
-  window.performance.mark("mark_start_frame");
+// 优化前：
+// function updatePositions() {
+//   frame++;
+//   window.performance.mark("mark_start_frame");
 
-  var items = document.querySelectorAll('.mover');
-  for (var i = 0; i < items.length; i++) {
+//   var items = document.querySelectorAll('.mover');
+//   for (var i = 0; i < items.length; i++) {
+//     var scrollTop =  window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+//     var phase = Math.sin((scrollTop / 1250) + (i % 5));
+//     items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
+//   }
+
+//   // 再次使用User Timing API。这很值得学习
+//   // 能够很容易地自定义测量维度
+//   window.performance.mark("mark_end_frame");
+//   window.performance.measure("measure_frame_duration", "mark_start_frame", "mark_end_frame");
+//   if (frame % 10 === 0) {
+//     var timesToUpdatePosition = window.performance.getEntriesByName("measure_frame_duration");
+//     logAverageFrame(timesToUpdatePosition);
+//   }
+// }
+
+//优化后：将scrollTop的赋值提取到for循环外，执行一次就好
+  function updatePositions() {
+    frame++;
+    window.performance.mark("mark_start_frame");
+
+    var items = document.querySelectorAll('.mover');
     var scrollTop =  window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
-    var phase = Math.sin((scrollTop / 1250) + (i % 5));
-    items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
-  }
+    for (var i = 0; i < items.length; i++) {
+      var phase = Math.sin((scrollTop / 1250) + (i % 5));
+      items[i].style.left = items[i].basicLeft + 100 * phase + 'px';
+    }
 
-  // 再次使用User Timing API。这很值得学习
-  // 能够很容易地自定义测量维度
-  window.performance.mark("mark_end_frame");
-  window.performance.measure("measure_frame_duration", "mark_start_frame", "mark_end_frame");
-  if (frame % 10 === 0) {
-    var timesToUpdatePosition = window.performance.getEntriesByName("measure_frame_duration");
-    logAverageFrame(timesToUpdatePosition);
+    // 再次使用User Timing API。这很值得学习
+    // 能够很容易地自定义测量维度
+    window.performance.mark("mark_end_frame");
+    window.performance.measure("measure_frame_duration", "mark_start_frame", "mark_end_frame");
+    if (frame % 10 === 0) {
+      var timesToUpdatePosition = window.performance.getEntriesByName("measure_frame_duration");
+      logAverageFrame(timesToUpdatePosition);
+    }
   }
-}
 
 // 在页面滚动时运行updatePositions函数
 window.addEventListener('scroll', updatePositions);
