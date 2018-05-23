@@ -10,11 +10,20 @@
 
 根据 PageSpeed Insights 的 Optimization Suggestions 进行修改
 
-#### 桌面上至少为90分
+#### 图片优化：
+- 使用 convert 库压缩了 pizzeria.jpg 和 profilepic.jpg
 
-图片优化：使用 convert 库压缩了 pizzeria.jpg 和 profilepic.jpg （reduce their size by 2M)（ 20+ -> 80+ ）(还需探寻自动化流程)
+#### 优化 CSS 发送过程：
+- style.css： 使用 loadCSS 函数异步加载 CSS ，不会阻止初次呈现关键内容。（未提取关键CSS、未考虑浏览器适应问题）
+- print.css： 使用媒体查询，只在打印内容时适用，网页初次加载不会阻塞渲染。
+- WecFont： 使用 the Web Font Loader 异步加载 Google Font
 
-#### 移动设备上至少为90分
+#### 使用浏览器缓存：
+- 指定最佳的 Cache-Control 政策：发现 GitHub Page 本身已经有相应的政策，但是 Header 不允许修改，通过 meta 又只能指定 html 的缓存政策
+
+#### 缩减资源（HTML、CSS 和 JavaScript）的大小
+- 最好创建一个使用这些工具的构建流程，以便缩减和重命名开发文件并将其保存到正式版目录。（如Grunt或Gulp，但在配置的时候都出现报错，还未解决）
+
 
 ----
 
