@@ -456,7 +456,7 @@ var resizePizzas = function(size) {
 
   // 优化后：将对所有pizza对象的选取提到for循环以外，无需重复执行，一次就好;由于pizza对象具备同质性，因此对dx和newwidth的赋值也是一次就好
   function changePizzaSizes(size) {
-    var randomPizzaContainer = document.querySelectorAll(".randomPizzaContainer");
+    var randomPizzaContainer = document.getElementsByClassName("randomPizzaContainer");
     var dx = determineDx(randomPizzaContainer[0], size);
     var newwidth = (randomPizzaContainer[0].offsetWidth + dx) + 'px';
     for (var i = 0; i < randomPizzaContainer.length; i++) {
@@ -532,7 +532,7 @@ function logAverageFrame(times) {   // times参数是updatePositions()由User Ti
     frame++;
     window.performance.mark("mark_start_frame");
 
-    var items = document.querySelectorAll('.mover');
+    var items = document.getElementsByClassName('mover');
     var scrollTop =  window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
     for (var i = 0; i < items.length; i++) {
       var phase = Math.sin((scrollTop / 1250) + (i % 5));
@@ -554,9 +554,13 @@ window.addEventListener('scroll', updatePositions);
 
 // 当页面加载时生成披萨滑窗
 document.addEventListener('DOMContentLoaded', function() {
+  console.log();
   var cols = 8;
   var s = 256;
-  for (var i = 0; i < 200; i++) {
+  var lines = Math.ceil(document.documentElement.clientHeight / s);
+  var pizzaNeeded = lines * cols;
+
+  for (var i = 0; i < pizzaNeeded; i++) {
     var elem = document.createElement('img');
     elem.className = 'mover';
     elem.src = "images/pizza.png";
